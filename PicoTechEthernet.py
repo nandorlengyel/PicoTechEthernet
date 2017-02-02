@@ -15,39 +15,39 @@ class PicoTechEthernet():
         self.socket.send("\x00".encode('ascii'))  # Greet
         recv = self.socket.recv(200)
         if recv.startswith(self.model) or recv == b'Unknown Command\x00':
-            # Get an initial responce
+            # Get an initial response
             return(True)
         else:
             print(recv)
             return(False)
 
     def lock(self):
-        self.socket.send("lock\x00".encode('ascii'))  # Acquire lock
-        recv = self.socket.recv(200)
-        if recv == b"Lock Success\x00" or recv == b'Lock Success (already locked to this machine)\x00':
-            return(True)
-        else:
+        return(self.set(
+            "lock\x00",
+            [b"Lock Success\x00",
+             b'Lock Success (already locked to this machine)\x00']
+        ))
+
+    def alive(self):
+        return(self.set("4", b'Alive\x00'))
+
+    def set(self, value, response=False):
+        self.socket.send(value.encode('ascii'))
+
+        if response is not False:
+
+            recv = self.socket.recv(60)
+            # print(recv)
+            if type(response) == list:
+                for item in response:
+                    if recv == item:
+                        return(True)
+            else:
+                if recv == response:
+                    return(True)
             print(recv)
             return(False)
 
-    def alive(self):
-        self.socket.send("4".encode('ascii'))  # Alive to device
-        recv = self.socket.recv(60)
-        if recv == b'Alive\x00':  # read back b'Alive\x00'
-            return(True)
-        else:
-            print(recv)  # what did it respond with instead
-            return(False)
-
-    def set(self, value, responce=False):
-        self.socket.send(value.encode('ascii'))
-        if responce is not False:
-            recv = self.socket.recv(60)
-            if recv == responce:
-                return(True)
-            else:
-                print(recv)
-                return(False)
         else:
             return(True)
 
@@ -93,9 +93,9 @@ class PicoTechEthernetFind():
     def find(self, ip='255.255.255.255', port=23):
         self.socket.connect((ip, port))  # Connect
         self.socket.send("0x666666".encode('ascii'))
-        responce = self.socket.recv(200)
-        # responce = b"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffa199affffffffffffffffffffffffffffffffffff"
-        port = int(responce[58:62], 16)
+        response = self.socket.recv(200)
+        # response = b"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffa199affffffffffffffffffffffffffffffffffff"
+        port = int(response[58:62], 16)
         # recover the responding ip address, somehow?
         print(port)
 
