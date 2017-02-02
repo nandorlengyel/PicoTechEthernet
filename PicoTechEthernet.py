@@ -14,7 +14,8 @@ class PicoTechEthernet():
         self.socket.connect((self.ip, self.port))  # Connect
         self.socket.send("\x00".encode('ascii'))  # Greet
         recv = self.socket.recv(200)
-        if recv.startswith(self.model):
+        if recv.startswith(self.model) or recv == b'Unknown Command\x00':
+            # Get an initial responce
             return(True)
         else:
             print(recv)
@@ -38,14 +39,17 @@ class PicoTechEthernet():
             print(recv)  # what did it respond with instead
             return(False)
 
-    def channelsetup(self):
-        self.socket.send(bytes("1w", 'ascii'))
-        recv = self.socket.recv(60)
-        if recv == b'Converting\x00':
-            return(True)
+    def set(self, value, responce=False):
+        self.socket.send(value.encode('ascii'))
+        if responce is not False:
+            recv = self.socket.recv(60)
+            if recv == responce:
+                return(True)
+            else:
+                print(recv)
+                return(False)
         else:
-            print(recv)
-            return(False)
+            return(True)
 
     def filter(self, Hz=50):
         if filter == 50:
