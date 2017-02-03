@@ -9,8 +9,9 @@ CM3.filter(50)
 # print(CM3.EEPROM())
 CM3.set("1w", b'Converting\x00')  # needs channel setup information
 
-
 generator = CM3.generator()
+# generator, a function that yields(values) when next() is called against it.
+
 while [True]:
     print()
     channel, value = next(generator)
@@ -18,6 +19,6 @@ while [True]:
     print(value)
 
     # Compose payload and submit data to InfluxDB
-    payload = str(channel) + ' value=' + str(value)
+    payload = "{0!s} value={1!s}".format(channel, value)
     r = requests.post("http://localhost:8086/write?db=CM3", data=payload)
     print(r)
