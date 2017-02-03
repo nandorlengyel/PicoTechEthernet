@@ -1,3 +1,4 @@
+import requests
 from PicoTechEthernet import PicoTechEthernet as PicoTechEthernet
 
 CM3 = PicoTechEthernet(model=b"CM3", ip='192.168.57.200', port=6554)
@@ -15,3 +16,8 @@ while [True]:
     channel, value = next(generator)
     print(channel)
     print(value)
+
+    # Compose payload and submit data to InfluxDB
+    payload = str(channel) + ' value=' + str(value)
+    r = requests.post("http://localhost:8086/write?db=CM3", data=payload)
+    print(r)
