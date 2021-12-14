@@ -4,7 +4,12 @@ import requests
 import socket
 from PicoTechEthernet import PicoTechEthernetCM3
 
-CM3 = PicoTechEthernetCM3(ip='192.168.57.200', port=6554)
+# TODO: Set ip, port from env var
+CM3 = PicoTechEthernetCM3(ip='169.254.192.89', port=1)
+
+result_dict = {}
+
+# TODO: Start on round minute
 
 while True:  # Loop forever
     try:
@@ -14,13 +19,15 @@ while True:  # Loop forever
         # print(CM3.EEPROM())
         CM3.set('1w', b'Converting\x00')  # channel setup ??
 
-        for load in next(CM3):
-            print(load)
+        for load in next(CM3):       
+            try:
+                result_dict[load['channel']].append(load['value'])
+            except KeyError:
+                 result_dict[load['channel']] = [load['value']]
+            
+            print(result_dict)
 
-            # Submit information to a time series database, InfluxDB
-            # eg  load = '0 value=0.21761050447821617'
-            # AKA channel 0, 0.21761050447821617 mV
-            r = requests.post('http://localhost:8086/write?db=CM3', data=load)
+            # TODO: Aggregate and send on all round minutes
 
     except requests.exceptions.ConnectionError:
         print('Connection Error to InfluxDB')

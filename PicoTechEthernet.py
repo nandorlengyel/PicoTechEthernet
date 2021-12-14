@@ -90,9 +90,7 @@ class PicoTechEthernet(object):
                 if read is not False:
                     channel, value = self.decode(read)
                     # print(channel, value)
-                    payload = '{0!s} value={1!s}'.format(channel, value)
-                    # print(payload)
-                    yield payload
+                    yield {'channel': channel, 'value': value}
 
 
 class PicoTechEthernetCM3(PicoTechEthernet):
