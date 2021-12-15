@@ -15,11 +15,10 @@ class AggregateThread(threading.Thread):
 
         self.panda_token = panda_token
 
-        self.device_id = 0
+        self.device_id = os.environ.get('PD_ID', None)
         self.time_stamp = None
 
-        self.device_id_dict = {0:'123',1:'234',2:'345'}
-
+        self.device_id_dict = {0:os.environ.get('PD_ID_0', None),1:os.environ.get('PD_ID_1', None),2:os.environ.get('PD_ID_2', None)}
         threading.Thread.__init__(self, target=self.aggregate_results, daemon=True) 
 
     def aggregate_results(self):
@@ -31,7 +30,7 @@ class AggregateThread(threading.Thread):
                 agg_value = np.sum(value)
 
                 consumption_value = agg_value / 1000 * 230 / 1000 / 60
-                measurement_data[self.device_id][self.device_id_dict[key]] = {"time": self.localize_time(self.time_stamp), "value": consumption_value}  
+                measurement_data[self.device_id][self.device_id_dict[key]] = [{"time": self.localize_time(self.time_stamp), "value": consumption_value}] 
             print(self.put_to_api(json.dumps(measurement_data)))
     
     def localize_time(self, time):
@@ -47,7 +46,7 @@ class AggregateThread(threading.Thread):
                 'Content-Type': 'application/json',
                 'Authorization': 'Token ' + self.panda_token
             })
-
+ 
     def panda_login(self):
         url = self.panda_url + 'api/auth/'
         body = {

@@ -16,7 +16,7 @@ q = queue.Queue()
 
 agg_thread= AggregateThread(q)
 agg_thread.start()
-# agg_thread.panda_login()
+agg_thread.panda_login()
 
 while True:  # Loop forever
     now = datetime.datetime.now()
