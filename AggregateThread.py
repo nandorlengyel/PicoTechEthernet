@@ -1,5 +1,4 @@
 import threading
-import numpy as np
 import pytz
 import os
 import json
@@ -27,7 +26,7 @@ class AggregateThread(threading.Thread):
             measurement_data = dict({self.device_id: {}})    
 
             for key, value in result_dict.items():           
-                agg_value = np.sum(value)
+                agg_value = sum(value)
 
                 consumption_value = agg_value / 1000 * 230 / 1000 / 60
                 measurement_data[self.device_id][self.device_id_dict[key]] = [{"time": self.localize_time(self.time_stamp), "value": consumption_value}] 
